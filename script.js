@@ -2,7 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const heart = document.querySelector(".heart");
   
    // const socket = io("http://35.176.160.64:3000");
-    const socket = io("https://35.176.160.64:3000", { secure: true });
+   // const socket = io("https://35.176.160.64:3000", { secure: true });
+    const socket = io('wss://heartbeat.backend.website/socket.io/', {
+        transports: ['websocket']
+    });
+
 
   
     socket.on('pulse', () => {
