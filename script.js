@@ -1,13 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const heart = document.querySelector(".heart");
   
-   // const socket = io("http://35.176.160.64:3000");
-   // const socket = io("https://35.176.160.64:3000", { secure: true });
-    const socket = io('wss://heartbeat.backend.website/socket.io/', {
-        transports: ['websocket']
-    });
-
-
+    const socket = io("http://00.00.00.00:3000");
   
     socket.on('pulse', () => {
       heart.classList.add("pulse");
