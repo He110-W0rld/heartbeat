@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const heart = document.querySelector(".heart");
   
-    const socket = io("http://00.00.00.00:3000");
+    // const socket = io("http://00.00.00.00:3000");
+    const socket = io("https://heartbeat.backend.website");
   
     socket.on('pulse', () => {
       heart.classList.add("pulse");
