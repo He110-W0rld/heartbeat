@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     socket.emit("pulse");
 
-    fetch("http://35.179.115.82:5000/notify", {
+    fetch("https://telegram.backend.website/notify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
