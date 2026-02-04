@@ -1,5 +1,9 @@
 // ================= HEART + SOCKET =================
 const heart = document.querySelector(".heart");
+const secret = document.getElementById("secretMessage");
+
+let longPressFired = false;
+let pressTimer = null;
 
 const socket = io("https://heartbeat.backend.website");
 
@@ -10,6 +14,12 @@ socket.on("pulse", () => {
 
 heart.addEventListener("click", (event) => {
   event.stopPropagation();
+
+  // If long press just happened, do not treat it as a normal click
+  if (longPressFired) {
+    longPressFired = false;
+    return;
+  }
 
   heart.classList.add("pulse");
   socket.emit("pulse");
@@ -86,11 +96,10 @@ updateKyivCounter();
 setInterval(updateKyivCounter, 60000);
 
 // ================= SECRET MESSAGE (LONG PRESS 4s) =================
-const secret = document.getElementById("secretMessage");
-let pressTimer = null;
-
 function showSecretMessage() {
   if (!secret) return;
+
+  longPressFired = true;
   secret.classList.add("show");
 
   setTimeout(() => {
@@ -99,9 +108,14 @@ function showSecretMessage() {
 }
 
 heart.addEventListener("pointerdown", () => {
-  pressTimer = setTimeout(showSecretMessage, 4000); // 🔥 4 seconds
+  longPressFired = false;
+  pressTimer = setTimeout(showSecretMessage, 4000); // ✅ 4 seconds hold
 });
 
-heart.addEventListener("pointerup", () => clearTimeout(pressTimer));
-heart.addEventListener("pointerleave", () => clearTimeout(pressTimer));
-heart.addEventListener("pointercancel", () => clearTimeout(pressTimer));
+function cancelLongPress() {
+  clearTimeout(pressTimer);
+}
+
+heart.addEventListener("pointerup", cancelLongPress);
+heart.addEventListener("pointerleave", cancelLongPress);
+heart.addEventListener("pointercancel", cancelLongPress);
