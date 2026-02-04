@@ -15,7 +15,6 @@ socket.on("pulse", () => {
 heart.addEventListener("click", (event) => {
   event.stopPropagation();
 
-  // If long press just happened, do not treat it as a normal click
   if (longPressFired) {
     longPressFired = false;
     return;
@@ -113,7 +112,6 @@ const PHRASES = [
   "You make even bad days lighter"
 ];
 
-// Storage keys (versioned)
 const KEY_ORDER = "hb_phrase_order_v1";
 const KEY_START_DAY = "hb_phrase_start_day_v1";
 const KEY_CYCLE = "hb_phrase_cycle_v1";
@@ -150,10 +148,7 @@ function loadOrderState() {
   let startDay = null;
   let cycle = null;
 
-  try {
-    order = JSON.parse(localStorage.getItem(KEY_ORDER));
-  } catch { order = null; }
-
+  try { order = JSON.parse(localStorage.getItem(KEY_ORDER)); } catch { order = null; }
   startDay = Number(localStorage.getItem(KEY_START_DAY));
   cycle = Number(localStorage.getItem(KEY_CYCLE));
 
@@ -165,16 +160,7 @@ function loadOrderState() {
   const startValid = Number.isFinite(startDay) && startDay > 0;
   const cycleValid = Number.isFinite(cycle) && cycle >= 0;
 
-  if (!orderValid || !startValid || !cycleValid) {
-    const freshOrder = shuffleArray([...Array(len).keys()]);
-    localStorage.setItem(KEY_ORDER, JSON.stringify(freshOrder));
-    localStorage.setItem(KEY_START_DAY, String(today));
-    localStorage.setItem(KEY_CYCLE, "0");
-    return { order: freshOrder, startDay: today, cycle: 0 };
-  }
-
-  // If startDay is somehow in the future -> reset
-  if (today < startDay) {
+  if (!orderValid || !startValid || !cycleValid || today < startDay) {
     const freshOrder = shuffleArray([...Array(len).keys()]);
     localStorage.setItem(KEY_ORDER, JSON.stringify(freshOrder));
     localStorage.setItem(KEY_START_DAY, String(today));
@@ -185,7 +171,6 @@ function loadOrderState() {
   const offsetDays = today - startDay;
   const cycleNow = Math.floor(offsetDays / len);
 
-  // If we crossed into a new cycle, reshuffle once for the current cycle
   if (cycleNow > cycle) {
     const newOrder = shuffleArray([...Array(len).keys()]);
     localStorage.setItem(KEY_ORDER, JSON.stringify(newOrder));
@@ -210,22 +195,17 @@ function showSecretMessage() {
   if (!secret) return;
 
   longPressFired = true;
-
-  // Phrase of the day (Kyiv)
   secret.textContent = getPhraseOfToday();
-
   secret.classList.add("show");
 
   setTimeout(() => {
     secret.classList.remove("show");
-    // optional: clear text after hiding
-    // secret.textContent = "";
   }, 2500);
 }
 
 heart.addEventListener("pointerdown", () => {
   longPressFired = false;
-  pressTimer = setTimeout(showSecretMessage, 4000); // ✅ 4 seconds hold
+  pressTimer = setTimeout(showSecretMessage, 4000);
 });
 
 function cancelLongPress() {
