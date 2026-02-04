@@ -79,9 +79,29 @@ function updateKyivCounter() {
     `${hours} hour${hours !== 1 ? "s" : ""} ` +
     `${minutes} minute${minutes !== 1 ? "s" : ""}`;
 
-  // fade-in only once
   el.classList.add("fade-in");
 }
 
 updateKyivCounter();
 setInterval(updateKyivCounter, 60000);
+
+// ================= SECRET MESSAGE (LONG PRESS 4s) =================
+const secret = document.getElementById("secretMessage");
+let pressTimer = null;
+
+function showSecretMessage() {
+  if (!secret) return;
+  secret.classList.add("show");
+
+  setTimeout(() => {
+    secret.classList.remove("show");
+  }, 2500);
+}
+
+heart.addEventListener("pointerdown", () => {
+  pressTimer = setTimeout(showSecretMessage, 4000); // 🔥 4 seconds
+});
+
+heart.addEventListener("pointerup", () => clearTimeout(pressTimer));
+heart.addEventListener("pointerleave", () => clearTimeout(pressTimer));
+heart.addEventListener("pointercancel", () => clearTimeout(pressTimer));
