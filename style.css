@@ -5,6 +5,9 @@ body {
   height: 100vh;
   background-color: #fae1dd;
   margin: 0;
+
+  /* Smooth day <-> night transition */
+  transition: background-color 0.9s ease;
 }
 
 /* ================= MAIN HEART ================= */
@@ -17,12 +20,13 @@ body {
   cursor: pointer;
   z-index: 2;
 
-  /* Glow effect */
+  /* Glow effect (your brighter settings) */
   box-shadow:
     0 0 25px rgba(255, 0, 0, 0.55),
     0 0 55px rgba(255, 0, 0, 0.35);
 
-  transition: box-shadow 0.3s ease;
+  /* Smooth glow changes */
+  transition: box-shadow 0.45s ease;
 }
 
 .heart:before,
@@ -35,27 +39,14 @@ body {
   border-radius: 50%;
 }
 
-.heart:before {
-  top: -50px;
-  left: 0;
-}
-
-.heart:after {
-  top: 0;
-  left: -50px;
-}
+.heart:before { top: -50px; left: 0; }
+.heart:after { top: 0; left: -50px; }
 
 /* ================= HEART PULSE ================= */
 @keyframes pulse {
-  0% {
-    transform: scale(1) rotate(45deg);
-  }
-  50% {
-    transform: scale(1.5) rotate(45deg);
-  }
-  100% {
-    transform: scale(1) rotate(45deg);
-  }
+  0% { transform: scale(1) rotate(45deg); }
+  50% { transform: scale(1.5) rotate(45deg); }
+  100% { transform: scale(1) rotate(45deg); }
 }
 
 .pulse {
@@ -84,6 +75,9 @@ body {
   width: 10px;
   position: relative;
   transform: rotate(-45deg);
+
+  /* Smooth dimming at night */
+  transition: opacity 0.9s ease;
 }
 
 .hearts > *:before,
@@ -96,25 +90,12 @@ body {
   position: absolute;
 }
 
-.hearts > *:before {
-  top: -5px;
-  left: 0;
-}
-
-.hearts > *:after {
-  left: 5px;
-  top: 0;
-}
+.hearts > *:before { top: -5px; left: 0; }
+.hearts > *:after { left: 5px; top: 0; }
 
 @keyframes heart {
-  0% {
-    transform: translateY(0) rotate(-45deg) scale(0.3);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-150px) rotate(-45deg) scale(1.3);
-    opacity: 0;
-  }
+  0% { transform: translateY(0) rotate(-45deg) scale(0.3); opacity: 1; }
+  100% { transform: translateY(-150px) rotate(-45deg) scale(1.3); opacity: 0; }
 }
 
 .one   { animation: heart 1s ease-out infinite; }
@@ -145,18 +126,15 @@ body {
   font-weight: bold;
   color: red;
   font-family: Arial, sans-serif;
+
+  /* Smooth color change */
+  transition: color 0.9s ease;
 }
 
 /* ================= FADE-IN TIMER ================= */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .time-text {
@@ -165,6 +143,9 @@ body {
   color: #d10000;
   font-family: Arial, sans-serif;
   max-width: 92vw;
+
+  /* Smooth color change */
+  transition: color 0.9s ease;
 }
 
 .time-text.fade-in {
@@ -202,13 +183,8 @@ body {
 
 /* ================= MOBILE ================= */
 @media (max-width: 600px) {
-  .love-text {
-    font-size: 18px;
-  }
-
-  .time-text {
-    font-size: 14px;
-  }
+  .love-text { font-size: 18px; }
+  .time-text { font-size: 14px; }
 }
 
 /* ================= SOFT NIGHT MODE (21:00–06:59 Kyiv) ================= */
@@ -224,7 +200,7 @@ body.night .time-text {
   color: #ffb3b3;
 }
 
-/* A bit deeper glow at night */
+/* Deeper glow at night */
 body.night .heart {
   box-shadow:
     0 0 28px rgba(255, 80, 80, 0.55),
