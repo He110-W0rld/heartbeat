@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Heartbeat</title>
   <link rel="icon" type="image/png" href="heartbeat-favicon.png">
-  <link rel="stylesheet" href="style.css">
+
+  <!-- cache-bust -->
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -22,7 +24,6 @@
   </div>
 
   <div class="footer">
-    <!-- Phrase of the day will appear here only after long press -->
     <div id="secretMessage" class="secret-message" aria-live="polite"></div>
 
     <span class="love-text">I love you so much</span>
@@ -30,6 +31,8 @@
   </div>
 
   <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
-  <script src="script.js"></script>
+
+  <!-- cache-bust -->
+  <script src="script.js?v=7"></script>
 </body>
 </html>
