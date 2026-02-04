@@ -1,237 +1,151 @@
-// ================= HEART + SOCKET =================
-const heart = document.querySelector(".heart");
-const secret = document.getElementById("secretMessage");
-
-let longPressFired = false;
-let pressTimer = null;
-
-const socket = io("https://heartbeat.backend.website");
-
-socket.on("pulse", () => {
-  heart.classList.add("pulse");
-  setTimeout(() => heart.classList.remove("pulse"), 800);
-});
-
-heart.addEventListener("click", (event) => {
-  event.stopPropagation();
-
-  // If long press just happened, do not treat it as a normal click
-  if (longPressFired) {
-    longPressFired = false;
-    return;
-  }
-
-  heart.classList.add("pulse");
-  socket.emit("pulse");
-
-  fetch("https://telegram.backend.website/notify", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: "❤️" })
-  }).catch(() => {});
-
-  setTimeout(() => heart.classList.remove("pulse"), 800);
-});
-
-// ================= KYIV TIME COUNTER =================
-const TZ = "Europe/Kyiv";
-
-const dtf = new Intl.DateTimeFormat("en-CA", {
-  timeZone: TZ,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false
-});
-
-function getKyivParts() {
-  const parts = dtf.formatToParts(new Date());
-  const get = (t) => +parts.find(p => p.type === t).value;
-  return {
-    year: get("year"),
-    month: get("month"),
-    day: get("day"),
-    hour: get("hour"),
-    minute: get("minute")
-  };
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #fae1dd;
+  margin: 0;
 }
 
-// Start date: February 15, 2025 00:00 (Kyiv)
-const start = { year: 2025, month: 2, day: 15, hour: 0, minute: 0 };
-
-function updateKyivCounter() {
-  const now = getKyivParts();
-
-  let years = now.year - start.year;
-  let months = now.month - start.month;
-  let days = now.day - start.day;
-  let hours = now.hour - start.hour;
-  let minutes = now.minute - start.minute;
-
-  if (minutes < 0) { minutes += 60; hours--; }
-  if (hours < 0) { hours += 24; days--; }
-  if (days < 0) {
-    const daysInPrevMonth = new Date(now.year, now.month - 1, 0).getDate();
-    days += daysInPrevMonth;
-    months--;
-  }
-  if (months < 0) { months += 12; years--; }
-
-  const el = document.getElementById("kyivCounter");
-  if (!el) return;
-
-  el.textContent =
-    `${years} year${years !== 1 ? "s" : ""} ` +
-    `${months} month${months !== 1 ? "s" : ""} ` +
-    `${days} day${days !== 1 ? "s" : ""} ` +
-    `${hours} hour${hours !== 1 ? "s" : ""} ` +
-    `${minutes} minute${minutes !== 1 ? "s" : ""}`;
-
-  el.classList.add("fade-in");
+/* MAIN HEART */
+.heart {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  background-color: red;
+  transform: rotate(45deg);
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
 }
 
-updateKyivCounter();
-setInterval(updateKyivCounter, 60000);
-
-// ================= PHRASE OF THE DAY (Kyiv, random order, no repeats) =================
-const PHRASES = [
-  "Forever",
-  "My favorite person",
-  "You feel like home",
-  "You are my calm",
-  "I’d choose you again",
-  "This smile again",
-  "In every lifetime",
-  "You are my safe place",
-  "With you, it’s easy",
-  "I feel right with you",
-  "Home is you",
-  "You’re my little monkey",
-  "You’re my medicine",
-  "You make even bad days lighter"
-];
-
-// Storage keys (versioned)
-const KEY_ORDER = "hb_phrase_order_v1";
-const KEY_START_DAY = "hb_phrase_start_day_v1";
-const KEY_CYCLE = "hb_phrase_cycle_v1";
-
-const dtfDate = new Intl.DateTimeFormat("en-CA", {
-  timeZone: TZ,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit"
-});
-
-function getKyivDayNumber() {
-  const parts = dtfDate.formatToParts(new Date());
-  const get = (t) => +parts.find(p => p.type === t).value;
-  const y = get("year");
-  const m = get("month");
-  const d = get("day");
-  return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+.heart:before,
+.heart:after {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  border-radius: 50%;
 }
 
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+.heart:before { top: -50px; left: 0; }
+.heart:after { top: 0; left: -50px; }
+
+/* HEART PULSE */
+@keyframes pulse {
+  0% { transform: scale(1) rotate(45deg); }
+  50% { transform: scale(1.5) rotate(45deg); }
+  100% { transform: scale(1) rotate(45deg); }
 }
 
-function loadOrderState() {
-  const len = PHRASES.length;
-  const today = getKyivDayNumber();
+.pulse { animation: pulse 0.8s ease-in-out; }
 
-  let order = null;
-  let startDay = null;
-  let cycle = null;
-
-  try {
-    order = JSON.parse(localStorage.getItem(KEY_ORDER));
-  } catch { order = null; }
-
-  startDay = Number(localStorage.getItem(KEY_START_DAY));
-  cycle = Number(localStorage.getItem(KEY_CYCLE));
-
-  const orderValid =
-    Array.isArray(order) &&
-    order.length === len &&
-    order.every(n => Number.isInteger(n) && n >= 0 && n < len);
-
-  const startValid = Number.isFinite(startDay) && startDay > 0;
-  const cycleValid = Number.isFinite(cycle) && cycle >= 0;
-
-  if (!orderValid || !startValid || !cycleValid) {
-    const freshOrder = shuffleArray([...Array(len).keys()]);
-    localStorage.setItem(KEY_ORDER, JSON.stringify(freshOrder));
-    localStorage.setItem(KEY_START_DAY, String(today));
-    localStorage.setItem(KEY_CYCLE, "0");
-    return { order: freshOrder, startDay: today, cycle: 0 };
-  }
-
-  // If startDay is somehow in the future -> reset
-  if (today < startDay) {
-    const freshOrder = shuffleArray([...Array(len).keys()]);
-    localStorage.setItem(KEY_ORDER, JSON.stringify(freshOrder));
-    localStorage.setItem(KEY_START_DAY, String(today));
-    localStorage.setItem(KEY_CYCLE, "0");
-    return { order: freshOrder, startDay: today, cycle: 0 };
-  }
-
-  const offsetDays = today - startDay;
-  const cycleNow = Math.floor(offsetDays / len);
-
-  // If we crossed into a new cycle, reshuffle once for the current cycle
-  if (cycleNow > cycle) {
-    const newOrder = shuffleArray([...Array(len).keys()]);
-    localStorage.setItem(KEY_ORDER, JSON.stringify(newOrder));
-    localStorage.setItem(KEY_CYCLE, String(cycleNow));
-    return { order: newOrder, startDay, cycle: cycleNow };
-  }
-
-  return { order, startDay, cycle };
+/* FLOATING HEARTS */
+.hearts {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 10px;
+  z-index: 1;
 }
 
-function getPhraseOfToday() {
-  const { order, startDay } = loadOrderState();
-  const len = PHRASES.length;
-  const today = getKyivDayNumber();
-  const offsetDays = Math.max(0, today - startDay);
-  const idx = offsetDays % len;
-  return PHRASES[order[idx]];
+.hearts > * {
+  background-color: red;
+  height: 10px;
+  width: 10px;
+  position: relative;
+  transform: rotate(-45deg);
 }
 
-// ================= SECRET MESSAGE (LONG PRESS 4s) =================
-function showSecretMessage() {
-  if (!secret) return;
-
-  longPressFired = true;
-
-  // Phrase of the day (Kyiv)
-  secret.textContent = getPhraseOfToday();
-
-  secret.classList.add("show");
-
-  setTimeout(() => {
-    secret.classList.remove("show");
-    // optional: clear text after hiding
-    // secret.textContent = "";
-  }, 2500);
+.hearts > *:before,
+.hearts > *:after {
+  content: "";
+  background-color: red;
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+  position: absolute;
 }
 
-heart.addEventListener("pointerdown", () => {
-  longPressFired = false;
-  pressTimer = setTimeout(showSecretMessage, 4000); // ✅ 4 seconds hold
-});
+.hearts > *:before { top: -5px; left: 0; }
+.hearts > *:after { left: 5px; top: 0; }
 
-function cancelLongPress() {
-  clearTimeout(pressTimer);
+@keyframes heart {
+  0% { transform: translateY(0) rotate(-45deg) scale(0.3); opacity: 1; }
+  100% { transform: translateY(-150px) rotate(-45deg) scale(1.3); opacity: 0; }
 }
 
-heart.addEventListener("pointerup", cancelLongPress);
-heart.addEventListener("pointerleave", cancelLongPress);
-heart.addEventListener("pointercancel", cancelLongPress);
+.one { animation: heart 1s ease-out infinite; }
+.two { animation: heart 1.5s ease-out infinite; }
+.three { animation: heart 2s ease-out infinite; }
+.four { animation: heart 2.5s ease-out infinite; }
+.five { animation: heart 3s ease-out infinite; }
+.six { animation: heart 3.5s ease-out infinite; }
+.seven { animation: heart 4s ease-out infinite; }
+
+/* FOOTER */
+.footer {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 3;
+}
+
+.love-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: red;
+  font-family: Arial, sans-serif;
+}
+
+/* FADE-IN TIMER */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.time-text {
+  opacity: 0;
+  font-size: 16px;
+  color: #d10000;
+  font-family: Arial, sans-serif;
+}
+
+.time-text.fade-in {
+  animation: fadeIn 1.2s ease-out forwards;
+}
+
+/* SECRET MESSAGE */
+.secret-message {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 18px;
+  border-radius: 20px;
+  background: rgba(255, 0, 0, 0.9);
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  transform: translateY(6px) scale(0.98);
+  transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.35s ease, padding 0.35s ease;
+}
+
+.secret-message.show {
+  max-height: 80px;
+  opacity: 1;
+  padding: 10px 18px;
+  transform: translateY(0) scale(1);
+}
+
+@media (max-width: 600px) {
+  .love-text { font-size: 18px; }
+  .time-text { font-size: 14px; }
+}
