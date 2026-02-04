@@ -95,15 +95,131 @@ function updateKyivCounter() {
 updateKyivCounter();
 setInterval(updateKyivCounter, 60000);
 
+// ================= PHRASE OF THE DAY (Kyiv, random order, no repeats) =================
+const PHRASES = [
+  "Forever",
+  "My favorite person",
+  "You feel like home",
+  "You are my calm",
+  "I’d choose you again",
+  "This smile again",
+  "In every lifetime",
+  "You are my safe place",
+  "With you, it’s easy",
+  "I feel right with you",
+  "Home is you",
+  "You’re my little monkey",
+  "You’re my medicine",
+  "You make even bad days lighter"
+];
+
+// Storage keys (versioned)
+const KEY_ORDER = "hb_phrase_order_v1";
+const KEY_START_DAY = "hb_phrase_start_day_v1";
+const KEY_CYCLE = "hb_phrase_cycle_v1";
+
+const dtfDate = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+});
+
+function getKyivDayNumber() {
+  const parts = dtfDate.formatToParts(new Date());
+  const get = (t) => +parts.find(p => p.type === t).value;
+  const y = get("year");
+  const m = get("month");
+  const d = get("day");
+  return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function loadOrderState() {
+  const len = PHRASES.length;
+  const today = getKyivDayNumber();
+
+  let order = null;
+  let startDay = null;
+  let cycle = null;
+
+  try {
+    order = JSON.parse(localStorage.getItem(KEY_ORDER));
+  } catch { order = null; }
+
+  startDay = Number(localStorage.getItem(KEY_START_DAY));
+  cycle = Number(localStorage.getItem(KEY_CYCLE));
+
+  const orderValid =
+    Array.isArray(order) &&
+    order.length === len &&
+    order.every(n => Number.isInteger(n) && n >= 0 && n < len);
+
+  const startValid = Number.isFinite(startDay) && startDay > 0;
+  const cycleValid = Number.isFinite(cycle) && cycle >= 0;
+
+  if (!orderValid || !startValid || !cycleValid) {
+    const freshOrder = shuffleArray([...Array(len).keys()]);
+    localStorage.setItem(KEY_ORDER, JSON.stringify(freshOrder));
+    localStorage.setItem(KEY_START_DAY, String(today));
+    localStorage.setItem(KEY_CYCLE, "0");
+    return { order: freshOrder, startDay: today, cycle: 0 };
+  }
+
+  // If startDay is somehow in the future -> reset
+  if (today < startDay) {
+    const freshOrder = shuffleArray([...Array(len).keys()]);
+    localStorage.setItem(KEY_ORDER, JSON.stringify(freshOrder));
+    localStorage.setItem(KEY_START_DAY, String(today));
+    localStorage.setItem(KEY_CYCLE, "0");
+    return { order: freshOrder, startDay: today, cycle: 0 };
+  }
+
+  const offsetDays = today - startDay;
+  const cycleNow = Math.floor(offsetDays / len);
+
+  // If we crossed into a new cycle, reshuffle once for the current cycle
+  if (cycleNow > cycle) {
+    const newOrder = shuffleArray([...Array(len).keys()]);
+    localStorage.setItem(KEY_ORDER, JSON.stringify(newOrder));
+    localStorage.setItem(KEY_CYCLE, String(cycleNow));
+    return { order: newOrder, startDay, cycle: cycleNow };
+  }
+
+  return { order, startDay, cycle };
+}
+
+function getPhraseOfToday() {
+  const { order, startDay } = loadOrderState();
+  const len = PHRASES.length;
+  const today = getKyivDayNumber();
+  const offsetDays = Math.max(0, today - startDay);
+  const idx = offsetDays % len;
+  return PHRASES[order[idx]];
+}
+
 // ================= SECRET MESSAGE (LONG PRESS 4s) =================
 function showSecretMessage() {
   if (!secret) return;
 
   longPressFired = true;
+
+  // Phrase of the day (Kyiv)
+  secret.textContent = getPhraseOfToday();
+
   secret.classList.add("show");
 
   setTimeout(() => {
     secret.classList.remove("show");
+    // optional: clear text after hiding
+    // secret.textContent = "";
   }, 2500);
 }
 
