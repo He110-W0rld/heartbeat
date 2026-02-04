@@ -7,22 +7,17 @@ body {
   margin: 0;
 }
 
+/* MAIN HEART */
 .heart {
   width: 100px;
   height: 100px;
   position: relative;
   background-color: red;
   transform: rotate(45deg);
-  display: inline-block;
   cursor: pointer;
-  transition: transform 0.3s ease-in-out;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  font-family: Arial, sans-serif;
   z-index: 2;
 }
 
@@ -46,29 +41,18 @@ body {
   left: -50px;
 }
 
-.tap-text {
-  position: absolute;
-  z-index: 2;
-  pointer-events: none;
-  transform: rotate(-45deg);
-}
-
+/* PULSE */
 @keyframes pulse {
-  0% {
-    transform: scale(1) rotate(45deg);
-  }
-  50% {
-    transform: scale(1.5) rotate(45deg);
-  }
-  100% {
-    transform: scale(1) rotate(45deg);
-  }
+  0% { transform: scale(1) rotate(45deg); }
+  50% { transform: scale(1.5) rotate(45deg); }
+  100% { transform: scale(1) rotate(45deg); }
 }
 
 .pulse {
   animation: pulse 0.8s ease-in-out;
 }
 
+/* FLOATING HEARTS */
 .hearts {
   position: absolute;
   top: 50%;
@@ -81,7 +65,6 @@ body {
 
 .hearts > * {
   background-color: red;
-  display: inline-block;
   height: 10px;
   width: 10px;
   position: relative;
@@ -119,34 +102,15 @@ body {
   }
 }
 
-.one {
-  animation: heart 1s ease-out infinite;
-}
+.one { animation: heart 1s ease-out infinite; }
+.two { animation: heart 1.5s ease-out infinite; }
+.three { animation: heart 2s ease-out infinite; }
+.four { animation: heart 2.5s ease-out infinite; }
+.five { animation: heart 3s ease-out infinite; }
+.six { animation: heart 3.5s ease-out infinite; }
+.seven { animation: heart 4s ease-out infinite; }
 
-.two {
-  animation: heart 1.5s ease-out infinite;
-}
-
-.three {
-  animation: heart 2s ease-out infinite;
-}
-
-.four {
-  animation: heart 2.5s ease-out infinite;
-}
-
-.five {
-  animation: heart 3s ease-out infinite;
-}
-
-.six {
-  animation: heart 3.5s ease-out infinite;
-}
-
-.seven {
-  animation: heart 4s ease-out infinite;
-}
-
+/* FOOTER */
 .footer {
   position: fixed;
   bottom: 20px;
@@ -155,19 +119,24 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   z-index: 1;
 }
 
 .love-text {
   font-size: 24px;
   font-weight: bold;
-  font-family: Arial, sans-serif;
   color: red;
+  font-family: Arial, sans-serif;
+}
+
+.time-text {
+  font-size: 16px;
+  color: #d10000;
+  font-family: Arial, sans-serif;
 }
 
 @media (max-width: 600px) {
-  .love-text {
-    font-size: 18px;
-  }
+  .love-text { font-size: 18px; }
+  .time-text { font-size: 14px; }
 }
