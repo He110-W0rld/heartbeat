@@ -210,3 +210,34 @@ body {
     font-size: 14px;
   }
 }
+
+/* ================= SOFT NIGHT MODE (21:00–06:59 Kyiv) ================= */
+body.night {
+  background-color: #2a1518; /* soft dark rose */
+}
+
+body.night .love-text {
+  color: #ff9a9a;
+}
+
+body.night .time-text {
+  color: #ffb3b3;
+}
+
+/* A bit deeper glow at night */
+body.night .heart {
+  box-shadow:
+    0 0 28px rgba(255, 80, 80, 0.55),
+    0 0 70px rgba(255, 80, 80, 0.35);
+}
+
+body.night .heart.pulse {
+  box-shadow:
+    0 0 45px rgba(255, 100, 100, 0.9),
+    0 0 120px rgba(255, 100, 100, 0.6);
+}
+
+/* Floating hearts slightly dimmer */
+body.night .hearts > * {
+  opacity: 0.75;
+}
