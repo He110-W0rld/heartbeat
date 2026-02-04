@@ -215,3 +215,18 @@ function cancelLongPress() {
 heart.addEventListener("pointerup", cancelLongPress);
 heart.addEventListener("pointerleave", cancelLongPress);
 heart.addEventListener("pointercancel", cancelLongPress);
+
+// ================= SOFT NIGHT MODE (Kyiv) =================
+function updateNightMode() {
+  const kyivHour = getKyivParts().hour;
+
+  // Night: 21:00 – 06:59
+  if (kyivHour >= 21 || kyivHour < 7) {
+    document.body.classList.add("night");
+  } else {
+    document.body.classList.remove("night");
+  }
+}
+
+updateNightMode();
+setInterval(updateNightMode, 60000);
